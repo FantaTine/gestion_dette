@@ -59,8 +59,8 @@ class UserController extends Controller
             // Hacher le mot de passe
             $userData['password'] = Hash::make($userData['password']);
 
-            // Gérer l'attribut 'active'
-            $userData['active'] = $request->has('active') ? (bool)$request->active : true;
+            // Utiliser la valeur de l'attribut 'active' telle quelle
+            $userData['active'] = $request->active;
 
             if ($request->hasFile('photo')) {
                 $path = $request->file('photo')->store('users', 'public');
@@ -93,6 +93,7 @@ class UserController extends Controller
             'role' => $user->role->name,
             'login' => $user->login,
             'active' => $user->active
+
         ];
 
         if ($user->photo) {

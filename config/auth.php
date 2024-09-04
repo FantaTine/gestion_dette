@@ -35,7 +35,7 @@ return [
     |
     */
 
-    'guards' => [
+'guards' => [
     'web' => [
         'driver' => 'session',
         'provider' => 'users',
@@ -44,7 +44,12 @@ return [
         'driver' => 'passport',
         'provider' => 'users',
     ],
+    'sanctum' => [
+        'driver' => 'sanctum',
+        'provider' => 'users',
+    ],
 ],
+
 
 
     /*
