@@ -15,11 +15,12 @@ trait ClientResponse
         ], $code);
     }
 
-    protected function errorResponse($message = null, $code): JsonResponse
+    protected function errorResponse($message = null, int $code = 400, $data = null): JsonResponse
     {
         return response()->json([
             'status' => 'Error',
             'message' => $message,
+            'data' => $data
         ], $code);
     }
 }

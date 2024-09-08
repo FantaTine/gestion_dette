@@ -60,13 +60,14 @@ class UserController extends Controller
             $userData['password'] = Hash::make($userData['password']);
 
             // Utiliser la valeur de l'attribut 'active' telle quelle
-            $userData['active'] = $request->active;
+            $userData['active'] = $request->active=='true' ? true : false;
+
 
             if ($request->hasFile('photo')) {
                 $path = $request->file('photo')->store('users', 'public');
                 $userData['photo'] = $path;
             }
-
+            
             $user = User::create($userData);
 
             return $this->successResponse(

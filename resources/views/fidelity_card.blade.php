@@ -26,7 +26,7 @@
         <h2>{{ $client->user->nom }} {{ $client->user->prenom }}</h2>
       <img src="{{ $photoPath }}" class="photo" alt="Photo">
         <p><strong>Téléphone:</strong> {{ $client->telephone }}</p>
-        <img src="{{ public_path($qrCodePath) }}" alt="QR Code">
+        <img src="data:image/png;base64,{{ $qrCodePath }}" alt="QR Code">
     </div>
 </body>
 </html>

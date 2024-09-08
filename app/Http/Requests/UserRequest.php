@@ -32,7 +32,7 @@ class UserRequest extends FormRequest
                 'min:5',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,}$/'
             ],
-            'active' => 'boolean',
+            'active' => 'string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
         ];
     }

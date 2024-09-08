@@ -28,8 +28,8 @@ class ClientRequest extends FormRequest
             'user.role_id' => 'required_with:user|exists:roles,id',
             'user.login' => 'required_with:user|unique:users,login',
             'user.password' => ['required_with:user', 'min:5', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,}$/'],
-            'user.active' => 'boolean',
-            'user.photo' => 'nullable|image'
+            'user.active' => 'string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ];
     }
 
@@ -53,6 +53,10 @@ class ClientRequest extends FormRequest
             'user.password.required_with' => 'Le mot de passe est obligatoire lors de la création d\'un compte utilisateur.',
             'user.password.min' => 'Le mot de passe doit contenir au moins 5 caractères.',
             'user.password.regex' => 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial.',
+            'photo.image' => 'Le fichier doit être une image.',
+            'photo.mimes' => 'L\'image doit être de type : jpeg, png, jpg, gif.',
+            'photo.max' => 'L\'image ne doit pas dépasser 2Mo.',
+            'active.boolean' => 'La valeur de l\'attribut active doit être un booléen.',
         ];
     }
 }

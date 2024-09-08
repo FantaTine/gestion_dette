@@ -30,6 +30,7 @@ Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::apiResource('clients', ClientController::class);
     Route::post('clients/telephone', [ClientController::class, 'searchByPhone']);
     Route::get('clients/{client}/user', [ClientController::class, 'getUserInfo']);
+    Route::post('/clients', [ClientController::class, 'store']);
 });
 
 

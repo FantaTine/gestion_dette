@@ -30,6 +30,8 @@ class ClientController extends Controller
     public function store(ClientRequest $request)
     {
         try {
+            // dd($request->validated());
+           
             $client = $this->clientService->createClient($request->validated(), $request->input('user'));
             return $this->successResponse($client, 'Client créé avec succès', 201);
         } catch (\Exception $e) {
