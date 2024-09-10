@@ -15,3 +15,4 @@ interface ClientRepository
     public function findByPhone(string $phone): ?Client;
     public function findWithUser(int $id): ?Client;
 }
+

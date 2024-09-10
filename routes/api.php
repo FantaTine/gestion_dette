@@ -11,6 +11,7 @@ Route::prefix('v1')->group(function () {
     // Routes d'authentification
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
 });
 
 // Routes protégées

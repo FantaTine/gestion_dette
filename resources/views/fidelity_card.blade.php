@@ -23,9 +23,9 @@
 </head>
 <body>
     <div class="card">
-        <h2>{{ $client->user->nom }} {{ $client->user->prenom }}</h2>
-      <img src="{{ $photoPath }}" class="photo" alt="Photo">
-        <p><strong>Téléphone:</strong> {{ $client->telephone }}</p>
+        <h2>{{ $client['user']['nom']  }} {{ $client['user']['prenom'] }}</h2>
+     {{--  <img src="{{ $photoPath }}" class="photo" alt="Photo"> --}}
+        <p><strong>Téléphone:</strong> {{$client['user']['telephone'] }}</p>
         <img src="data:image/png;base64,{{ $qrCodePath }}" alt="QR Code">
     </div>
 </body>

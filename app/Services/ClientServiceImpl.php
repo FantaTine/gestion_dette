@@ -17,13 +17,16 @@ class ClientServiceImpl implements ClientService
 {
     private $clientRepository;
     private $fidelityCardService;
-    private $cloudinary;
+    private $cloudinaryService;
 
-    public function __construct(ClientRepository $clientRepository, FidelityCardService $fidelityCardService, CloudinaryService $cloudinaryservice)
-    {
+    public function __construct(
+        ClientRepository $clientRepository,
+        FidelityCardService $fidelityCardService,
+        CloudinaryService $cloudinaryService
+    ) {
         $this->clientRepository = $clientRepository;
         $this->fidelityCardService = $fidelityCardService;
-        $this->cloudinaryservice = $cloudinaryservice;
+        $this->cloudinaryService = $cloudinaryService;
     }
 
     public function getAllClients(array $filters = []): Collection
@@ -31,46 +34,26 @@ class ClientServiceImpl implements ClientService
         return $this->clientRepository->all($filters);
     }
 
-    private function handleImageUpload(\Illuminate\Http\UploadedFile $image): string
-    {
-        try {
-            $localPath = $image->store('user_images', 'public');
-            $fullLocalPath = Storage::disk('public')->path($localPath);
-
-            return $localPath;
-        } catch (\Exception $e) {
-            \Log::error("Échec de l'upload de l'image : " . $e->getMessage());
-            throw $e;
-        }
-    }
-
     public function createClient(array $clientData, ?array $userData = null): Client
     {
+       // dd(isset($clientData['user']));
+       /*  dd($clientData); */
         DB::beginTransaction();
         try {
-            if ($userData) {
-                $photo = request()->file('user.photo');
-                if ($photo) {
-                    $localPath = $this->handleImageUpload($photo);
-                    $userData['photo'] = $localPath;
-                    $userData['photo_upload_status'] = 'pending';
-                }
-
-                $user = User::create($userData);
-                $clientData['user_id'] = $user->id;
-
-                if (isset($localPath)) {
-                    UploadToCloudinaryJob::dispatch($user, Storage::disk('public')->path($localPath));
-                }
-            }
-
             $client = $this->clientRepository->create($clientData);
 
-            $fidelityCardPath = $this->fidelityCardService->generateFidelityCard($client);
+            if ($userData !== null) {
+                $this->handleUserCreation($client, $userData);
+            }
+if(isset($clientData['user'])){
 
+            $fidelityCardPath = $this->fidelityCardService->generateFidelityCard($clientData);
             $this->sendFidelityCardEmail($client, $fidelityCardPath);
+        }
 
             DB::commit();
+
+            // L'événement ClientCreated sera automatiquement dispatché par l'observer
             return $client;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -78,19 +61,20 @@ class ClientServiceImpl implements ClientService
         }
     }
 
-    private function sendFidelityCardEmail(Client $client, string $fidelityCardPath): void
+    private function handleUserCreation($client, $userData)
     {
-        $login = $client->user->login ?? null;
-        if ($login && filter_var($login, FILTER_VALIDATE_EMAIL)) {
-            try {
-                Mail::to($login)->send(new FidelityCardMail($client, $fidelityCardPath));
-                \Log::info("Fidelity card email sent successfully for client ID: " . $client->id);
-            } catch (\Exception $e) {
-                \Log::error("Failed to send fidelity card email for client ID: " . $client->id . ". Error: " . $e->getMessage());
-            }
-        } else {
-            \Log::warning("Unable to send fidelity card email. Invalid or missing email for client ID: " . $client->id);
+        if (isset($userData['photo'])) {
+            $localPath = $this->handleImageUpload($userData['photo']);
+            $userData['photo'] = $localPath;
+            $userData['photo_upload_status'] = 'pending';
         }
+
+        $user = $this->clientRepository->createUser($userData);
+        $client->user()->associate($user);
+        $client->save();
+
+        // Nous ne dispatchez plus le job ici
+        // L'événement ClientCreated se chargera de cela via le listener
     }
 
     public function getClientById(int $id): Client
@@ -115,5 +99,33 @@ class ClientServiceImpl implements ClientService
             'client' => $client,
             'user' => $client->user
         ];
+    }
+
+    private function handleImageUpload(\Illuminate\Http\UploadedFile $image): string
+    {
+        try {
+            $localPath = $image->store('user_images', 'public');
+            $fullLocalPath = Storage::disk('public')->path($localPath);
+
+            return $localPath;
+        } catch (\Exception $e) {
+            \Log::error("Échec de l'upload de l'image : " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function sendFidelityCardEmail(Client $client, string $fidelityCardPath): void
+    {
+        $login = $client->user->login ?? null;
+        if ($login && filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to($login)->send(new FidelityCardMail($client, $fidelityCardPath));
+                \Log::info("Fidelity card email sent successfully for client ID: " . $client->id);
+            } catch (\Exception $e) {
+                \Log::error("Failed to send fidelity card email for client ID: " . $client->id . ". Error: " . $e->getMessage());
+            }
+        } else {
+            \Log::warning("Unable to send fidelity card email. Invalid or missing email for client ID: " . $client->id);
+        }
     }
 }
