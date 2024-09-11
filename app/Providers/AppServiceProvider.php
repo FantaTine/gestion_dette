@@ -12,8 +12,10 @@ use App\Repositories\ClientRepositoryImpl;
 use App\Services\ClientService;
 use App\Services\ClientServiceImpl;
 use App\Services\CustomTokenService;
-
-
+use App\Repositories\DetteRepositoryInterface;
+use App\Repositories\DetteRepository;
+use App\Services\DetteServiceInterface;
+use App\Services\DetteService;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(CustomTokenService::class, function ($app) {
             return new CustomTokenService($app->make(PersonalAccessTokenFactory::class));
         });
+
+
+        $this->app->bind(DetteRepositoryInterface::class, DetteRepository::class);
+        $this->app->bind(DetteServiceInterface::class, DetteService::class);
     }
 
     public function boot()
